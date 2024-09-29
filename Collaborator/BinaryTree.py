@@ -1,22 +1,21 @@
 from Fraction import *
 
-
 symbols = ['+', '-', '×', '÷']  # 运算符字典
 precedence = {
-        '+': 1,
-        '-': 1,
-        '×': 2,
-        '÷': 2
-    }# 优先级字典
+    '+': 1,
+    '-': 1,
+    '×': 2,
+    '÷': 2
+}  # 优先级字典
 expressions_list = []  # 表达式列表
 exercises_list = []  # 练习题列表
 answers_list = []  # 答案列表
-right_answers_list = [] # 正确答案序号列表
-wrong_answers_list = [] # 错误答案序号列表
+right_answers_list = []  # 正确答案序号列表
+wrong_answers_list = []  # 错误答案序号列表
+
 
 # （类）这个是节点的格式类
 class Node:
-
 
     def __init__(self, value):
         self.value = value
@@ -54,30 +53,28 @@ def create_tree(symbols_num):
 
 # （函数）中序遍历树实现读取表达式 返回值为字符串类型的表达式
 def read_tree(node):
-    str = ""
+    result_str = ""
     if node is None:
-        return str  # 如果节点为空，则返回
-    if node.left is not None and node.left.value in ['+', '-'] and node.value in ['×', '÷']:
-        str += "("
-        str += read_tree(node.left)
-        str += ")"
-    else:
-        str += read_tree(node.left)
+        return result_str
 
-    str += node.value
+    # 为了保持运算符优先级
+    if node.left is not None and node.left.value in ['+', '-'] and node.value in ['×', '÷']:
+        result_str += "(" + read_tree(node.left) + ")"
+    else:
+        result_str += read_tree(node.left)
+
+    result_str += node.value
 
     if node.right is not None and node.right.value in ['+', '-'] and node.value in ['×', '÷']:
-        str += "("
-        str += read_tree(node.left)
-        str += ")"
+        result_str += "(" + read_tree(node.right) + ")"
     else:
-        str += read_tree(node.right)
+        result_str += read_tree(node.right)
 
-    return str
+    return result_str
 
 
 # (函数)利用后序遍历树和栈结构计算表达式的值 返回值为字符串类型的结果
-def calculate(tree_root):
+def calculate_expression(tree_root):
     # 栈压入的是字符串
     stack = []
 
@@ -178,3 +175,48 @@ def transform_tree(expression):
 
     return expt_stack[0] if expt_stack else None  # 返回根节点
 
+
+# (函数)把根节点对应的树进行变换 把树中所有加号和乘号的左右子树交换的情况 返回值为所有变体树的根节点生成器 比如(1+2)×3有3种变体(2+1)*3,3*(1+2),3*(2+1),在表达式形式上都是顺序问题
+def search_variant_tree(node):
+    if node is None:
+        return []
+
+    # 递归处理左子树和右子树
+    left_trees = search_variant_tree(node.left)
+    right_trees = search_variant_tree(node.right)
+
+    variants = []
+
+    # 处理加法和乘法节点
+    if node.value in ['+', '×']:
+        # 生成左右组合
+        for left_tree in left_trees:
+            for right_tree in right_trees:
+                new_tree1 = Node(node.value)
+                new_tree1.left = left_tree
+                new_tree1.right = right_tree
+                variants.append(new_tree1)
+
+                new_tree2 = Node(node.value)
+                new_tree2.left = right_tree
+                new_tree2.right = left_tree
+                variants.append(new_tree2)
+    else:
+        # 对其他运算符处理
+        for left_tree in left_trees:
+            new_tree = Node(node.value)
+            new_tree.left = left_tree
+            new_tree.right = node.right
+            variants.append(new_tree)
+
+        for right_tree in right_trees:
+            new_tree = Node(node.value)
+            new_tree.left = node.left
+            new_tree.right = right_tree
+            variants.append(new_tree)
+
+    # 当没有子树时，返回当前节点作为变体
+    if not variants:
+        variants.append(node)
+
+    return variants

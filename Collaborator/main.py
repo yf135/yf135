@@ -7,9 +7,9 @@ random_max=10# 默认值
 def produce_expression():
     init = random.randint(1, 3)
     tree_root = create_tree(init)
-    calculate(tree_root)# 这是一步验算
+    calculate_expression(tree_root)# 这是一步验算
     if tree_root.error==0 and read_tree(tree_root) not in expressions_list:
-        viariant_trees=search_viariant_tree(tree_root)
+        viariant_trees=search_variant_tree(tree_root)
         for viariant_tree in viariant_trees:  # 迭代生成器
             expressions_list.append(read_tree(viariant_tree))  # 处理并添加生成的表达式
         return read_tree(tree_root)
