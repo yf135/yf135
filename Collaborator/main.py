@@ -15,7 +15,8 @@ def produce_expression():
         return read_tree(tree_root)
     else:
         produce_expression()
-# (函数)检查答案正确性
+
+# (函数)用于检查答案正确性
 def check_answer(expressions_list,answers_list):
     for i in range(len(expressions_list)):
         if answers_list[i] == Fraction().from_string(calculate_expression(transform_tree(expressions_list[i]))).to_string_simplified():
